@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "EdwardHsu.Lab.CloudEvents": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
