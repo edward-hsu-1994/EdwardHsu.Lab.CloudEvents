@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  edwardhsu.lab.cloudevents:
+    image: ${DOCKER_REGISTRY-}edwardhsulabcloudevents
+    depends_on:
+      - kafka
+    build:
+      context: .
+      dockerfile: EdwardHsu.Lab.CloudEvents/Dockerfile
+  
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports: 
+      - "2181:2181"
+
+
+  kafka:
+    image: wurstmeister/kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
