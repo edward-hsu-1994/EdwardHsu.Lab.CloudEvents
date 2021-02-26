@@ -10,6 +10,7 @@
     <PackageReference Include="CloudNative.CloudEvents" Version="1.3.80" />
     <PackageReference Include="CloudNative.CloudEvents.Kafka" Version="1.3.80" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

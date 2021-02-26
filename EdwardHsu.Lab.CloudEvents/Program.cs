@@ -7,7 +7,10 @@ using Confluent.Kafka;
 using Newtonsoft.Json;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,14 +71,22 @@ namespace EdwardHsu.Lab.CloudEvents
         {
             var conf = new ProducerConfig { BootstrapServers = "kafka:9092" };
 
+            var sub = new System.Reactive.Subjects.Subject<int>();
+            var obs = sub.Buffer(TimeSpan.FromSeconds(5));
+
             using (var p = new ProducerBuilder<string, byte[]>(conf).Build())
             {
+                obs.Subscribe((x) =>
+                {
+                    p.Produce(TOPIC_NAME, CreateCloudEventMessage(x));
+                });
+
                 int i = 0;
                 while (true)
                 {
-                    p.Produce(TOPIC_NAME, CreateCloudEventMessage());
+                    sub.OnNext(i++);
                     Console.WriteLine("Sended Message " + i);
-                    Thread.Sleep(1000);
+                    Thread.Sleep(100);
                 }
 
                 // wait for up to 5 seconds for any inflight messages to be delivered.
@@ -84,18 +95,18 @@ namespace EdwardHsu.Lab.CloudEvents
 
         }
 
-        static KafkaCloudEventMessage CreateCloudEventMessage()
+        static KafkaCloudEventMessage CreateCloudEventMessage(IEnumerable<int> x)
         {
             var cloudEvent = new CloudEvent(
                    "com.github.pull.create",
                    new Uri("https://github.com/cloudevents/spec/pull/123"))
             {
                 DataContentType = new ContentType("application/json"),
-                Data = JsonConvert.SerializeObject(new
+                Data = JsonConvert.SerializeObject(x.Select(x => new
                 {
-                    Msg = "Hello World!",
+                    Msg = "Hello World! " + x,
                     Time = DateTime.Now.ToString()
-                })
+                }))
             };
 
             return new KafkaCloudEventMessage(cloudEvent, ContentMode.Structured, new JsonEventFormatter());
