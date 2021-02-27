@@ -25,7 +25,11 @@ namespace EdwardHsu.Lab.CloudEvents
         {
             Task.Run(() =>
             {
-                KafkaConsumer();
+                KafkaConsumer("Group1");
+            });
+            Task.Run(() =>
+            {
+                KafkaConsumer("Group2");
             });
             Task.Run(() =>
             {
@@ -35,19 +39,17 @@ namespace EdwardHsu.Lab.CloudEvents
             Console.Read();
         }
 
-        static void KafkaConsumer()
+        static void KafkaConsumer(string groupId)
         {
             var conf = new ConsumerConfig
             {
-                GroupId = "EdwardHsu.Lab.CloudEvents",
+                GroupId = groupId,
                 BootstrapServers = "kafka:9092",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
 
             using (var consumer = new ConsumerBuilder<string, byte[]>(conf).Build())
             {
-                var offsets = consumer.QueryWatermarkOffsets(new TopicPartition(TOPIC_NAME, new Partition(0)), TimeSpan.FromSeconds(1));
-
                 consumer.Subscribe(TOPIC_NAME);
 
                 while (true)
